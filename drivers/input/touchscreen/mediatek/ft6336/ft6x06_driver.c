@@ -215,23 +215,6 @@ static  void tpd_down(tinno_ts_data *ts, int x, int y, int pressure, int trackID
 
 static  int tpd_up(tinno_ts_data *ts, int x, int y, int pressure, int trackID)
 {
-    if (FACTORY_BOOT == get_boot_mode() || RECOVERY_BOOT == get_boot_mode())
-    {
-        CTP_DBG("x=%03d, y=%03d, ID=%03d", x, y, trackID);
-        input_report_abs(tpd->dev, ABS_PRESSURE, 0);
-        input_report_abs(tpd->dev, ABS_MT_PRESSURE, 0);
-        input_report_key(tpd->dev, BTN_TOUCH, 0);
-        input_report_abs(tpd->dev, ABS_MT_POSITION_X, x);
-        input_report_abs(tpd->dev, ABS_MT_POSITION_Y, y);
-#ifdef FTS_SUPPORT_TRACK_ID
-        input_report_abs(tpd->dev, ABS_MT_TRACKING_ID, trackID);
-#endif
-        input_report_abs(tpd->dev, ABS_MT_WIDTH_MAJOR, 0);
-        input_report_abs(tpd->dev, ABS_MT_TOUCH_MAJOR, 0);// This must be placed at the last one.
-        input_mt_sync(tpd->dev);
-    }
-    else  //Android 4.0 don't need to report these up events.
-    {
         int i, have_down_cnt = 0;
         for ( i=0; i < TINNO_TOUCH_TRACK_IDS; i++ )
         {
@@ -245,14 +228,9 @@ static  int tpd_up(tinno_ts_data *ts, int x, int y, int pressure, int trackID)
             input_mt_sync(tpd->dev);
         }
         CTP_DBG("x=%03d, y=%03d, ID=%03d, have_down=%d", x, y, trackID, have_down_cnt);
-    }
 
     __clear_bit(trackID, &ts->fingers_flag);
     TPD_UP_DEBUG_TRACK(x,y);
-    if (FACTORY_BOOT == get_boot_mode() || RECOVERY_BOOT == get_boot_mode())
-    {
-        tpd_button(x, y, 0);
-    }
     return 0;
 }
 
